@@ -1,0 +1,237 @@
+Run these before beginning the project. This will create the needed database and tables for the project.
+
+Create a new database and execute the code below in SQL Server’s query window to create the database tables.  
+CREATE TABLE PhysicianSpecialties
+(SpecialtyID integer,
+SpecialtyName varchar(50),
+CONSTRAINT PK_PhysicianSpecialties PRIMARY KEY (SpecialtyID))
+go
+CREATE TABLE ZipCodes
+(ZipCode varchar(10),
+City varchar(50),
+State varchar(2),
+CONSTRAINT PK_ZipCodes PRIMARY KEY (ZipCode))
+go
+CREATE TABLE PhysicianPractices
+(PracticeID integer,
+PracticeName varchar(50),
+Address_Line1 varchar(50),
+Address_Line2 varchar(50),
+ZipCode varchar(10),
+Phone varchar(14),
+Fax varchar(14),
+WebsiteURL varchar(50),
+CONSTRAINT PK_PhysicianPractices PRIMARY KEY (PracticeID),
+CONSTRAINT FK_PhysicianPractices_ZipCodes  FOREIGN KEY (ZipCode) REFERENCES Zipcodes)
+go
+CREATE TABLE Physicians
+(PhysicianID integer,
+FirstName varchar(40),
+LastName varchar(50),
+PracticeID integer,
+SpecialtyID integer,
+Email varchar(50),
+CONSTRAINT PK_Physicians PRIMARY KEY (PhysicianID),
+CONSTRAINT FK_Physicians_Practices FOREIGN KEY (PracticeID) REFERENCES  PhysicianPractices,
+CONSTRAINT FK_Physicians_PhysicianSpecialities FOREIGN KEY (SpecialtyID) REFERENCES PhysicianSpecialties)
+go
+CREATE TABLE Patients
+(PatientID integer,
+FirstName varchar(50),
+MiddleInitial varchar(1),
+LastName varchar(50),
+Address_Line1 varchar(50),
+Address_Line2 varchar(50),
+ZipCode varchar(10),
+Phone_Home varchar(14),
+Phone_Alternate varchar(14),
+Email varchar(50),
+CONSTRAINT PK_Patients PRIMARY KEY (PatientID))
+go
+CREATE TABLE Referrals
+(ReferralID integer,
+StartDate smalldatetime,
+EndDate smalldatetime,
+PatientID integer,
+PhysicianID integer,
+CONSTRAINT PK_Referrals PRIMARY KEY (ReferralID),
+CONSTRAINT FK_Referrals_Patients FOREIGN KEY (PatientID) REFERENCES Patients,
+CONSTRAINT FK_Referrals_Physicians FOREIGN KEY (PhysicianID) REFERENCES Physicians)
+go
+CREATE TABLE Services
+(ServiceID integer,
+ServiceName varchar(50),
+CONSTRAINT PK_ServiceID PRIMARY KEY (ServiceID))
+go
+CREATE TABLE Frequencies
+(FrequencyID integer,
+Frequency varchar(30),
+CONSTRAINT PK_Frequencies PRIMARY KEY (FrequencyID))
+go
+CREATE TABLE ReferralServices
+(ReferralID integer,
+ServiceID integer,
+FrequencyID integer,
+CONSTRAINT PK_ReferralServices PRIMARY KEY (ReferralID, ServiceID),
+CONSTRAINT FK_ReferralServices_Referrals FOREIGN KEY (ReferralID) REFERENCES Referrals,
+CONSTRAINT FK_ReferralServices_Services FOREIGN KEY (ServiceID) REFERENCES Services,
+CONSTRAINT FK_ReferralServices_Frequencies FOREIGN KEY (FrequencyID) REFERENCES Frequencies)
+go
+CREATE TABLE PaymentTypes
+(PaymentTypeID integer,
+PaymentType varchar(25),
+CONSTRAINT PK_PaymentTypes PRIMARY KEY (PaymentTypeID))
+go
+CREATE TABLE InsuranceCompanies
+(InsuranceID integer,
+InsuranceCompany varchar(50),
+Address_Line1 varchar(50),
+Address_Line2 varchar(50),
+ZipCode varchar(10),
+Phone varchar(15),
+Fax varchar(15),
+Email varchar(50),
+CONSTRAINT PK_InsuranceCompanies PRIMARY KEY (InsuranceID),
+CONSTRAINT FK_InsuranceCompanies_ZipCodes FOREIGN KEY (ZipCode) REFERENCES ZipCodes)
+go
+CREATE TABLE Contracts
+(ContractID integer,
+ReferralID integer,
+StartDate smalldatetime,
+EndDate smalldatetime,
+PaymentTypeID integer,
+InsuranceID integer,
+NegotiatedRate float,
+CONSTRAINT PK_Contracts PRIMARY KEY (ContractID),
+CONSTRAINT PK_Contracts_Referrals FOREIGN KEY (ReferralID) REFERENCES Referrals,
+CONSTRAINT FK_Contracts_PaymentTypes FOREIGN KEY (PaymentTypeID) REFERENCES PaymentTypes,
+CONSTRAINT FK_Contracts_InsuranceCompanies FOREIGN KEY (InsuranceID) REFERENCES InsuranceCompanies)
+go
+CREATE TABLE EmployeeTypes  #
+(EmployeeTypeID integer,
+EmployeeType varchar(25),
+CONSTRAINT PK_EmployeeTypes PRIMARY KEY (EmployeeTypeID))
+go
+CREATE TABLE EmployeeTitles
+(EmployeeTitleID integer,
+EmployeeTitle varchar(30),
+CONSTRAINT PK_EmployeeTitles PRIMARY KEY (EmployeeTitleID))
+go
+CREATE TABLE EmployeeSkillLevels
+(SkillLevelID integer,
+SkillLevel varchar(15),
+CONSTRAINT PK_EmployeeSkillLevels PRIMARY KEY (SkillLevelID))
+go
+CREATE TABLE BillingRates
+(EmployeeTypeID integer,
+SkillLevelID integer,
+BillingRate float,
+CONSTRAINT PK_PrimaryKey PRIMARY KEY (EmployeeTypeID, SkillLevelID),
+CONSTRAINT FK_BillingRates_EmployeeTypes FOREIGN KEY (EmployeeTypeID) REFERENCES EmployeeTypes,
+CONSTRAINT FK_BillingRates_EmployeeSkillLevels FOREIGN KEY (SkillLevelID) REFERENCES EmployeeSkillLevels)
+go
+CREATE TABLE EmployeeRanks
+(RankID integer,
+EmployeeTypeID integer,
+TitleID integer,
+SkillLevelID integer,
+HourlyRate float,
+Salary float,
+CONSTRAINT PK_EmployeeRanks PRIMARY KEY (RankID),
+CONSTRAINT FK_EmployeeRanks_EmployeeTypes FOREIGN KEY (EmployeeTypeID) REFERENCES EmployeeTypes,
+CONSTRAINT FK_EmployeeRanks_EmployeeTitles FOREIGN KEY (TitleID) REFERENCES EmployeeTitles,
+CONSTRAINT FK_EmployeeRanks_EmployeeSkillLevels FOREIGN KEY (SkillLevelID) REFERENCES EmployeeSkillLevels)
+go
+CREATE TABLE Employees
+(EmployeeID integer,
+FirstName varchar(30),
+MiddleInitial varchar(1),
+LastName varchar(50),
+Address_Line1 varchar(50),
+Address_Line2 varchar(50),
+ZipCode varchar(10),
+Phone varchar(14),
+Cell_Phone varchar(14),
+Email varchar(50),
+RankID integer,
+HourlyWage float,
+Salary float,
+CONSTRAINT PK_Employees PRIMARY KEY (EmployeeID),
+CONSTRAINT FK_Employees_EmployeeRanks FOREIGN KEY (RankID) REFERENCES EmployeeRanks,
+CONSTRAINT FK_Employee_ZipCodes FOREIGN KEY (ZipCode) REFERENCES ZipCodes)
+go
+CREATE TABLE Shifts
+(ShiftID integer,
+ShiftName varchar(20),
+StartTime time,
+EndTime time,
+CONSTRAINT PK_Shifts PRIMARY KEY (ShiftID))
+go
+CREATE TABLE DaysOfWeek
+(DayOfWeekID integer,
+DayOfWeek varchar(15),
+CONSTRAINT PK_DaysOfWeek PRIMARY KEY (DayOfWeekID))
+go
+
+CREATE TABLE Availability
+(EmployeeID integer,
+WeekOf smalldatetime,
+DayOfWeekID integer,
+ShiftID integer,
+CONSTRAINT PK_Availability PRIMARY KEY (EmployeeID, WeekOf, DayOfWeekID, ShiftID),
+CONSTRAINT FK_Availability_Employees FOREIGN KEY (EmployeeID) REFERENCES Employees,
+CONSTRAINT FK_Availability_DaysOfWeek FOREIGN KEY (DayOfWeekID) REFERENCES DaysOfWeek,
+CONSTRAINT FK_Availability_Shifts FOREIGN KEY (ShiftID) REFERENCES Shifts)
+go
+
+
+CREATE TABLE MedicalSuppliers
+(SupplierID integer,
+SupplierName varchar(50),
+Address_Line1 varchar(50),
+Address_Line2 varchar(50),
+ZipCode varchar(10),
+Phone varchar(14),
+Fax varchar(14),
+Email varchar(50),
+CONSTRAINT PK_MedicalSuppliers PRIMARY KEY (SupplierID),
+CONSTRAINT FK_MedicalSuppliers_ZipCodes FOREIGN KEY (ZipCode) REFERENCES ZipCodes)
+go
+CREATE TABLE Supplies
+(SupplyID integer,
+SupplyDescription varchar(40),
+ChargePerUnit float,
+CONSTRAINT PK_Supplies PRIMARY KEY (SupplyID))
+go
+CREATE TABLE SupplyInventory
+(SupplyID integer,
+SupplierID integer,
+DateReceived smalldatetime,
+UnitCost float,
+Quantity float,
+CONSTRAINT PK_SupplyInventory PRIMARY KEY (SupplyID, SupplierID, DateReceived),
+CONSTRAINT FK_SupplyInventory_Supplies FOREIGN KEY (SupplyID) REFERENCES Supplies,
+CONSTRAINT FK_SupplyInventory_Suppliers FOREIGN KEY (SupplierID) REFERENCES MedicalSuppliers)
+go
+CREATE TABLE Visits
+(VisitID integer,
+DateRendered smalldatetime,
+StartTime time,
+EndTime time,
+EmployeeID integer,
+PatientID integer,
+CONSTRAINT PK_Visits PRIMARY KEY (VisitID),
+CONSTRAINT FK_Visits_Employees FOREIGN KEY (EmployeeID) REFERENCES Employees,
+CONSTRAINT FK_Visits_Patients FOREIGN KEY (PatientID) REFERENCES Patients)
+go
+CREATE TABLE VisitDetails
+(VisitID integer,
+VisitDetailID integer,
+SupplyID integer,
+SupplyQuantity integer,
+ServiceID integer,
+Charge float,
+CONSTRAINT PK_VisitDetails PRIMARY KEY (VisitID, VisitDetailID),
+CONSTRAINT FK_VisitDetaiils_Supplies FOREIGN KEY (SupplyID) REFERENCES Supplies,
+CONSTRAINT FK_VisitDetails_Services FOREIGN KEY (ServiceID) REFERENCES Services)
+
