@@ -1,0 +1,455 @@
+1. Display a list of all patients who have a last name beginning with the letter “P”.	Patient Last Name, followed by a comma and a space, followed by the patient’s first name. (e.g. Smith, John)
+Sort order:  Patient Last Name - ascending
+	
+select Lastname + ', ' + FirstName as PatientName
+from Patients
+where lastname like 'P%'
+order by lastname
+
+
+
+2. Display a list of all patients who have an alternate/cell phone number
+Patient First Name, followed by a space, followed by the patient’s last name. (e.g. Melesa Poole), alternate/cell phone number
+Sort order:  Patient First Name – ascending
+                      Patient Last Name – ascending
+                      
+Select FirstName + ' ' + LastName, Phone_Alternate
+from Patients 
+where Phone_Alternate <> 'NULL'
+Order by FirstName, LastName asc
+
+
+
+3. Display a list of all patients who do not have an email address.  	Patient First Name, followed by a space, followed by the patient’s last name. (e.g. Melesa Poole)
+Sort order:  Patient First Name – ascending
+                      Patient Last Name – ascending
+                      
+Select FirstName + ' ' + LastName, Email
+from Patients 
+where Email = 'NULL'
+Order by FirstName, LastName asc
+
+
+
+4. Display a list of all patients who live in zipcode 24551. 	Patient Last Name, Address1, Address2, City, State, Zip
+Sort order:  Patient Last Name – descending
+
+Select LastName, Address_Line1, Address_Line2, City, State, Patients.ZipCode
+from Patients, ZipCodes 
+where Patients.ZipCode = ZipCodes.ZipCode and Patients.ZipCode = '24551'
+Order by LastName
+
+
+
+5. Display a list of all physicians whose specialty is Internal Medicine or Orthopedics	Physician First Name, space, last name (call this column Physician), Specialty
+Sort order:  Physician First Name – ascending
+                      Physician Last Name – descending
+                      
+Select FirstName, + ' ' + LastName as 'Physician', SpecialtyName
+from Physicians, PhysicianSpecialties
+where Physicians.SpecialtyID = PhysicianSpecialties.SpecialtyID and
+(PhysicianSpecialties.SpecialtyName = 'Internal Medicine' or PhysicianSpecialties.SpecialtyName = 'Orthopedics')
+Order by FirstName asc, LastName desc
+
+
+
+6. Display a list of all physicians, their specialties, and their practices	Physician Last Name, Specialty, Practice
+Sort order:  Physician Specialty  – ascending
+                     Physician Last Name – ascending 
+                     Practice – ascending 
+
+Select LastName, SpecialtyName, PracticeName
+from Physicians, PhysicianSpecialties, PhysicianPractices
+where Physicians.SpecialtyID = PhysicianSpecialties.SpecialtyID 
+and Physicians.PracticeID = PhysicianPractices.PracticeID
+
+Order by SpecialtyName, LastName, PracticeName 
+
+
+
+7. Display a list of all physicians whose practices are in Lynchburg	Physician Last Name, Practice Name, Address, City, State, Zipcode, Phone
+Sort order:   Zipcode – ascending 
+                      Practice Name – descending
+                      Physician Last Name – ascending 	
+                 
+Select LastName, PracticeName, Address_Line1, Address_Line2, City, State, Zipcodes.ZipCode, Phone
+from Physicians, PhysicianPractices, ZipCodes
+where Physicians.PracticeID = PhysicianPractices.PracticeID and 
+PhysicianPractices.ZipCode = ZipCodes.ZipCode
+and ZipCodes.City = 'Lynchburg'
+Order by ZipCode asc, PracticeName desc, Physicians.LastName asc 
+
+
+
+8. Display the number of physicians in each specialty	Specialty, number of physicians in each specialty
+Sort order: Specialty	
+
+select SpecialtyName, count(PhysicianID) as 'Physicians'
+from PhysicianSpecialties ps, Physicians pp where
+pp.SpecialtyID = ps.SpecialtyID
+Group by SpecialtyName
+Order by SpecialtyName
+
+
+
+9. Display the number of physicians in each practice, broken out by specialty	Practice, Specialty, number of physicians in each
+Sort order: Practice – ascending
+                    Specialty -- ascending
+                    
+Select PracticeName, SpecialtyName, count (PhysicianID) as
+PhysicianNumber from Physicians p inner join
+PhysicianPractices php on p.PracticeID = php.PracticeID
+inner join PhysicianSpecialties ph on p.SpecialtyID = ph.SpecialtyID
+group by PracticeName, SpecialtyName
+Order by PracticeName, SpecialtyName
+
+
+
+10. Display the list of specialties that have no physicians assigned to them.	Specialty
+Sort order:  Specialty – ascending 
+
+select Distinct pp.SpecialtyName as Specialty from 
+PhysicianSpecialties pp left join Physicians p on pp.SpecialtyID
+= p.SpecialtyID where p.SpecialtyID is null
+Order by Specialty asc
+
+
+
+11. Display a list of all referrals whose start date was in 2013.	Patient first name, followed by a space, followed by patient last name (Call this whole field “Patient Name”), Referring Physician Last Name (call this field “Physician”), StartDate, EndDate
+Sort Order: StartDate – ascending
+                     Patient First Name – ascending
+                     Physician Last Name - ascending	
+                     
+select p.FirstName + ' ' + p.LastName as 'Patient Name', ph.LastName as 'Physician', StartDate,
+EndDate from Patients p inner join Referrals r on p.PatientID = r.PatientID
+inner join Physicians ph on ph.PhysicianID = r.PhysicianID where StartDate like '%2013%'
+Order by StartDate, p.FirstName, ph.LastName
+
+
+
+12. Display a list of all the referrals whose start date is between October 1, 2014 and November 5, 2014	Patient first name, followed by a space, followed by patient last name (Call this whole field “Patient Name”), Referring Physician Last Name (call this field “Physician”), StartDate, EndDate
+Sort Order: StartDate – ascending
+                     Patient First Name – ascending
+                     Physician Last Name - ascending	
+                     
+select p.FirstName + ' ' + p.LastName as
+'PatientName', ph.LastName as 'Physician', StartDate, EndDate
+from Patients p inner join Referrals r on p.PatientID = r.PatientID
+inner join Physicians ph on ph.PhysicianID = r.PhysicianID where
+StartDate between '2014-10-1' and '2014-11-5' Order by StartDate, p.FirstName, ph.LastName
+
+
+
+13. Display the number of referrals given by each physician	Physician Last name, Physician First Name, number of referrals
+Sort Order: Physician Last Name – ascending
+                     Physician First Name – ascending
+                     
+select LastName, FirstName, count(ReferralID)
+as ReferralNumber from Physicians ph inner join
+Referrals r on ph.PhysicianID = r.PhysicianID
+Group by LastName, FirstName
+Order by LastName, FirstName
+
+
+
+14. List the number of referrals in 2014 for each service requested.	Service name, number of referrals
+Sort order:  Service name	
+
+select s.ServiceName, count (r.ReferralID)
+from Referrals r, Services s, ReferralServices rs
+where rs.ServiceID = s.ServiceID and r.ReferralID = rs.ReferralID
+and year (r.StartDate) = '2014'
+Group by ServiceName
+Order by ServiceName
+
+
+
+15. Display a list of all patients requiring exercise therapy in 2013	Patient Last Name, Patient First Name
+Sort order:  Patient last name – ascending
+                      Patient first name – ascending 	
+                      
+Select LastName, FirstName 
+from Patients, Referrals, ReferralServices, Services 
+where Patients.PatientID = Referrals.ReferralID and Referrals.ReferralID = ReferralServices.ReferralID
+and ReferralServices.ServiceID = Services.ServiceID
+and year (Referrals.StartDate) = '2013' and Services.ServiceName = 'Exercise Therapy'
+Order by Patients.LastName, Patients.FirstName
+
+
+
+
+16. Display a list of any referrals that require “Insulin injections” and “2x Daily” is NOT listed as their frequency.	Patient Last Name, Physician Last Name, referral start date
+Sort order:  Physician Last Name – ascending
+                      Patient Last Name – ascending
+                      Referral Start Date – ascending
+                      
+Select Patients.LastName, Physicians.LastName, Referrals.StartDate 
+from Patients, Physicians, Referrals, ReferralServices, Services, Frequencies
+where Patients.PatientID = Referrals.PatientID and
+Physicians.PhysicianID = Referrals.PhysicianID and 
+
+Referrals.ReferralID = ReferralServices.ReferralID and 
+ReferralServices.ServiceID = Services.ServiceID and
+Frequencies.FrequencyID = ReferralServices.FrequencyID and
+Services.ServiceName = 'Insulin Injections' and
+Frequencies.Frequency <> '2X Daily'
+Order by Physicians.LastName, Patients.LastName, Referrals.StartDate
+
+
+
+17. Display the contracts and payment methods associated with each referral	Patient Last Name, Physician Last Name, Referral Start Date, Contract Start Date, Payment Method
+Sort Order:  Payment Method  - ascending
+                      Physician Last Name – ascending
+                      Patient Last Name – ascending
+                      Referral Start Date – ascending
+                      Contract Start Date – ascending
+                      
+Select Patients.LastName, Physicians.LastName, Referrals.StartDate,
+Contracts.StartDate, PaymentTypes.PaymentType from
+Patients, Physicians, Referrals, Contracts, PaymentTypes
+Where Physicians.PhysicianID = Referrals.PhysicianID and
+Contracts.PaymentTypeID = PaymentTypes.PaymentTypeID and
+Contracts.ReferralID = Referrals.ReferralID and
+Patients.PatientID = Referrals.PatientID
+Order by PaymentType, Physicians.LastName, Patients.LastName, 
+Referrals.StartDate, Contracts.StartDate
+
+
+
+18. Display the number of contracts whose payment method is Insurance	Number of contracts (This is a single value)	
+Select count (ContractID) from Contracts, PaymentTypes
+where Contracts.PaymentTypeID = PaymentTypes.PaymentTypeID
+and PaymentType = 'Insurance'
+
+
+
+19. Display the number of contracts whose payment method is Insurance, broken out by Insurance Company	Insurance Company Name, number of contracts
+Sort order:  Insurance company name	
+
+Select InsuranceCompany, count (ContractID) from
+Contracts, InsuranceCompanies, PaymentTypes
+where Contracts.InsuranceID = InsuranceCompanies.InsuranceID and
+Contracts.PaymentTypeID = PaymentTypes.PaymentTypeID and
+PaymentTypes.PaymentType = 'Insurance'
+Group by InsuranceCompany
+
+
+
+20. List the Employees who are Nurses	Employee First Name, followed by a space, followed by Employee Middle Initial, followed by a space, followed by Employee Last Name (call this whole field “Nurses”)	
+
+Select Employees.EmployeeID, Employees.FirstName, + ' '+ Employees.MiddleInitial,
++ ' '+ Employees.LastName as Nurses 
+from Employees, EmployeeTypes, EmployeeRanks
+where Employees.RankID = EmployeeRanks.RankID and
+EmployeeRanks.EmployeeTypeID = EmployeeTypes.EmployeeTypeID
+and EmployeeTypes.EmployeeType = 'Nurse'
+
+
+
+
+21. Display the average hourly wage for all employees who are aides.	Average hourly wage (single value)	Select AVG (HourlyWage) from Employees, EmployeeTypes, EmployeeRanks
+where EmployeeRanks.EmployeeTypeID = EmployeeTypes.EmployeeTypeID and
+Employees.RankID = EmployeeRanks.RankID and
+EmployeeTypes.EmployeeType = 'Aide'
+
+
+
+
+22. Display the average hourly wage for all hourly employees broken out by level.	Skill level, average wage
+Sort order:  Skill Level	Select SkillLevel, AVG (HourlyWage) 
+from Employees, EmployeeTypes, EmployeeRanks, EmployeeSkillLevels
+where EmployeeRanks.EmployeeTypeID = EmployeeTypes.EmployeeTypeID and
+Employees.RankID = EmployeeRanks.RankID and
+EmployeeRanks.SkillLevelID = EmployeeSkillLevels.SkillLevelID
+Group by SkillLevel
+
+
+
+23. Display the total salary for all salaried employees.	Total salaries (single value)	Select sum (Salary) from Employees
+
+
+
+
+24. Display the number of employees assigned to each rank.	RankID, Employee Type,  Skill Level, Employee Title, number of employees
+Sort Order: RankID – ascending
+                     Employee type – ascending
+                     Skill Level – ascending
+                     Employee Title – ascending  
+                     
+Select EmployeeRanks.RankID, EmployeeType, EmployeeSkillLevels.SkillLevel, EmployeeTitle, 
+count (EmployeeID)
+from Employees, EmployeeTypes, EmployeeSkillLevels, EmployeeTitles, EmployeeRanks
+where EmployeeTypes.EmployeeTypeID = EmployeeRanks.EmployeeTypeID and
+Employees.RankID = EmployeeRanks.RankID and
+EmployeeRanks.TitleID = EmployeeTitles.EmployeeTitleID and
+EmployeeRanks.SkillLevelID = EmployeeSkillLevels.SkillLevelID
+Group by EmployeeRanks.RankID, EmployeeTypes.EmployeeType, EmployeeSkillLevels.SkillLevel,
+EmployeeTitles.EmployeeTitle
+Order by EmployeeRanks.RankID, EmployeeType, SkillLevel, EmployeeTitle
+
+
+
+25. Display a list of Employees who are nurses and were available to work on Sunday evenings during the week of 11/2/2014	Employee Last Name, Employee First Name
+Sort order:  Last Name – ascending
+                      First Name – ascending 	
+
+Select Employees.LastName, Employees.FirstName 
+from Employees, DaysOfWeek, Shifts, Availability, EmployeeTypes, EmployeeRanks
+where Availability.DayOfWeekID = DaysOfWeek.DayOfWeekID and
+Availability.ShiftID = Shifts.ShiftID and
+EmployeeRanks.EmployeeTypeID = EmployeeTypes.EmployeeTypeID and
+Availability.EmployeeID = Employees.EmployeeID and
+EmployeeRanks.RankID = Employees.RankID and
+ShiftName = 'Evening' and
+EmployeeType like 'Nurse' and
+DayOfWeek like 'Sunday'
+Order by Employees.LastName, Employees.FirstName
+
+
+
+26. Display a list of Employees who were available to work during morning shifts during the week of 11/2/2014 and had a skill level of level 3.	Employee Last Name, Employee First Name,
+Employee Type, Employee Title
+Sort order:  Employee Type – ascending
+                      Employee Title – ascending
+                      Employee Last Name – ascending
+                      Employee First Name – ascending	
+
+Select Distinct Employees.LastName, Employees.FirstName, EmployeeType, EmployeeTitle
+from Employees, Shifts, EmployeeTypes, EmployeeRanks, EmployeeTitles, Availability,
+EmployeeSkillLevels
+where EmployeeRanks.EmployeeTypeID = EmployeeTypes.EmployeeTypeID and
+EmployeeRanks.RankID = Employees.RankID and
+Availability.EmployeeID = Employees.EmployeeID and
+EmployeeRanks.TitleID = EmployeeTitles.EmployeeTitleID and
+EmployeeSkillLevels.SkillLevelID = EmployeeRanks.SkillLevelID and
+Availability.ShiftID = Shifts.ShiftID and
+ShiftName = 'Morning' and
+EmployeeSkillLevels.SkillLevel = 'Level 3'
+Order by EmployeeTitles.EmployeeTitle, LastName, FirstName
+
+
+
+
+27. Display the total quantity of catheters added to inventory during 2013.	Total catheters (single value)	
+
+Select sum (Quantity) from SupplyInventory, Supplies 
+where SupplyInventory.SupplyID = Supplies.SupplyID and 
+Supplies.SupplyDescription like 'catheters' and
+year (DateReceived) = 2013
+
+
+
+
+28. Display the total cost of “sterile gloves – small” provided by Poole’s Medical supplies during 2013.	Total cost (single value)	
+
+Select sum (UnitCost * Quantity) from SupplyInventory, Supplies, MedicalSuppliers
+where SupplyInventory.SupplyID = Supplies.SupplyID and
+MedicalSuppliers.SupplierID = SupplyInventory.SupplierID and
+Supplies.SupplyDescription like 'sterile glove%small' and
+MedicalSuppliers.SupplierName like 'Pool%' and
+year (DateReceived) = 2013
+
+
+
+29. Display the average cost of supplies for each supply item broken out by supplier.	Supply, Supplier, Average cost per supply item
+Sort order: Supply – ascending
+                    Supplier – ascending
+                    
+Select SupplyDescription, SupplierName, avg (UnitCost) 
+from SupplyInventory, Supplies, MedicalSuppliers
+where SupplyInventory.SupplyID = Supplies.SupplyID and
+MedicalSuppliers.SupplierID = SupplyInventory.SupplierID
+Group by SupplyDescription, SupplierName
+Order by SupplyDescription, SupplierName
+
+
+
+30. Display the total cost of all items purchased from suppliers broken out by supplier.	Supplier, Total cost of all items provided by supplier
+Sort order:  Supplier – ascending	Select SupplierName, sum (UnitCost * Quantity) 
+from SupplyInventory, Supplies, MedicalSuppliers
+where SupplyInventory.SupplyID = Supplies.SupplyID and
+MedicalSuppliers.SupplierID = SupplyInventory.SupplierID
+Group by SupplierName
+Order by SupplierName
+
+
+
+31. Display a list of all the visits that occurred from March 20, 2014 to March 25, 2014 (including March 20 and March 25)	DateRendered, Patient Last Name, Employee Last Name, Start Time, End time
+Sort order:  DateRendered – ascending
+                      Patient Last Name – ascending
+                      Employee Last Name – ascending
+                      Start Time – ascending 	
+                      
+Select DateRendered, Patients.LastName, Employees.LastName, StartTime, EndTime
+from Patients, Employees, Visits 
+where Employees.EmployeeID = Visits.EmployeeID and
+Patients.PatientID = Visits.PatientID and
+DateRendered between '3/20/2014' and '3/25/2014'
+Order by Visits.DateRendered, Patients.LastName, Employees.LastName, StartTime
+
+
+
+
+32. List the total charges for the visit that occurred on 2/12/2014 for Helen Ramirez that was provided by Laura White. 
+	Total charges (single value)
+  
+Select sum (Charge)
+from Patients, Employees, Visits, VisitDetails 
+where Employees.EmployeeID = Visits.EmployeeID and
+Patients.PatientID = Visits.PatientID and
+Visits.VisitID = VisitDetails.VisitID and
+Employees.LastName = 'White' and
+Patients.LastName = 'Ramirez' and
+DateRendered = '2/12/2014'
+
+
+
+33. List the number of patients who received insulin injections during 2014 (Note this is the number of unique patients who ever received insulin injections – not the number of visits in which insulin injections were provided).	Total number of patients (single value)	
+
+Select count (Distinct Patients.PatientID)
+From Patients, Services, Employees, Visits, VisitDetails
+Where Patients.PatientID = Visits.PatientID and
+Employees.EmployeeID = Visits.EmployeeID and 
+VisitDetails.ServiceID = Services.ServiceID and
+Visits.VisitID = VisitDetails.VisitID and
+Services.ServiceName like 'Insulin%' and 
+year (DateRendered) = '2014'
+
+
+
+34. List the total number of 4” self-adhesive bandages that were used in 2014	Total number of 4” self-adhesive bandages (single value)	
+
+Select sum (SupplyQuantity)
+From Supplies, Visits, VisitDetails
+Where Visits.VisitID = VisitDetails.VisitID and
+Supplies.SupplyID = VisitDetails.SupplyID and
+Supplies.SupplyDescription like '4% self-adhesive bandages' and 
+year (DateRendered) = '2014'
+
+
+
+35. List the average charge per visit per month in 2013 broken out by months	Month, average cost per visit
+Sort order:  month number - ascending	
+
+Select x.Month, avg (x.sumcharge)
+from (select Month(DateRendered) as Month, Visits.VisitID, sum(Charge) as sumcharge
+from VisitDetails, Visits
+where Visits.VisitID = VisitDetails.VisitID
+Group by Month(DateRendered), Visits.VisitID) x
+Group by x.Month
+Order by X.Month
+
+
+
+36. Provide a unique list of patients who received visits for feeding from November 1, 2014 until the current date.	Patient Last Name, Patient First Name
+Sort order:  Patient Last Name – ascending
+                      Patient First Name – ascending 
+                      
+Select Distinct Patients.LastName, Patients.FirstName 
+from Patients, Visits, VisitDetails, Services
+Where Visits.PatientID = Patients.PatientID and
+Visits.VisitID = VisitDetails.VisitID and
+VisitDetails.ServiceID = Services.ServiceID and
+Visits.DateRendered between '11/1/2014' and GETDATE() and
+Services.ServiceName = 'Feeding'
+Order by Patients.LastName, Patients.FirstName
